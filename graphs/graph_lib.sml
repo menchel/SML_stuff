@@ -3,11 +3,14 @@ sig
   type 'a node
   type 'a graph
   type distVal
+  val makeNode : 'a * 'a * int -> 'a node
+  val nodeToTuple : 'a node -> 'a * 'a * int
   val bfs : 'a graph -> 'a -> ('a * 'a -> bool) -> 'a list
   val dfs : 'a graph -> 'a -> ('a * 'a -> bool) -> 'a list
   val dijkstra : 'a graph -> 'a -> ('a * 'a -> bool) -> (('a * distVal) list)
   val topologicalSort : 'a graph -> ('a * 'a -> bool) -> 'a list
   val hasCycle : 'a graph -> ('a * 'a -> bool) -> bool
+  val minimalSpaningTree: 'a graph -> ('a * 'a -> bool) -> 'a node list
 end
 structure GraphLib : GraphLib =
 struct
@@ -31,6 +34,8 @@ struct
     fun map _ [] = []
     | map func (x::xs) = (func x) :: (map func xs)
 
+    fun makeNode (x,y,w) = Node(x,y,w)
+    fun nodeToTuple (Node(x,y,w)) = (x,y,w)
     (* functions *)
     fun bfs (graph: 'a graph) start cmpFunc =
     let
@@ -252,5 +257,60 @@ struct
             end
     in
     loop nodes [] distanceMapStart
+    end
+
+    fun minimalSpaningTree (graph: 'a graph) cmpFunc =
+    let
+        val nodes =
+            foldr (fn (Node(x,y,_),acc) =>
+                let
+                    fun addSmart n lst =
+                        if exists (fn m => cmpFunc(m,n)) lst then lst else n::lst
+                in
+                    addSmart x (addSmart y acc)
+                end
+            ) [] graph
+
+        fun insertSorted edge [] = [edge]
+          | insertSorted (Node(x,y,w)) (Node(x2,y2,w2)::xs) =
+                if w <= w2 then Node(x,y,w)::Node(x2,y2,w2)::xs
+                else Node(x2,y2,w2)::insertSorted (Node(x,y,w)) xs
+
+        val sortedEdges = foldl (fn (elem,acc) => insertSorted elem acc) [] graph
+
+        fun find x parents =
+            case List.find (fn (n,p) => cmpFunc(n,x)) parents of
+                SOME (_,p) => if cmpFunc(p,x) then x else find p parents
+            | NONE => x
+
+        fun uniteParents (x,y) parents =
+            let
+                val rootX = find x parents
+                val rootY = find y parents
+            in
+                if cmpFunc(rootX, rootY) then parents
+                else
+                    map (fn (n,p) =>
+                        if cmpFunc(n,rootX) then (n,rootY) else (n,p)
+                    ) parents
+            end
+
+        val parents = map (fn n => (n,n)) nodes
+
+        fun loop [] _ mst = mst
+          | loop (Node(x,y,w)::es) parents mst =
+                let
+                    val rootX = find x parents
+                    val rootY = find y parents
+                in
+                    if cmpFunc(rootX, rootY) then
+                        loop es parents mst
+                    else
+                        loop es (uniteParents (x,y) parents) (Node(x,y,w)::mst)
+                end
+
+        val mstEdges = loop sortedEdges parents []
+    in
+      mstEdges
     end
 end
