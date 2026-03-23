@@ -30,11 +30,13 @@ Attempt at a simple assembly
 
 ### 1. Loading the Interpreter
 ```sml
-use "interpreter.sml";```
+use "interpreter.sml";
+```
 
 ### 2. Running the interpreter
 ```sml
-Interpreter.runFile "path/to/your_code.asm";```
+Interpreter.runFile "path/to/your_code.asm";
+```
 
 ### Example code
 ```assembly
