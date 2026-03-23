@@ -154,7 +154,6 @@ end;
 
 fun runFile filename =
     let
-        (* 1. Open and read file content *)
         val ins = TextIO.openIn filename
         val content = TextIO.inputAll ins
         val _ = TextIO.closeIn ins
