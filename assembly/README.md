@@ -29,10 +29,12 @@ Attempt at a simple assembly
 ## How to use
 
 ### 1. Loading the Interpreter
-```sml use "interpreter.sml";```
+```sml
+use "interpreter.sml";```
 
 ### 2. Running the interpreter
-```sml Interpreter.runFile "path/to/your_code.asm";```
+```sml
+Interpreter.runFile "path/to/your_code.asm";```
 
 ### Example code
 ```assembly
