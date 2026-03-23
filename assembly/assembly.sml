@@ -150,7 +150,6 @@ struct
         in List.rev prog end
 end;
 
-(* --- NEW FILE HANDLING LOGIC --- *)
 
 fun runFile filename =
     let
